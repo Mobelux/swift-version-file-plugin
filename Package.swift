@@ -5,10 +5,6 @@ import PackageDescription
 
 let package = Package(
     name: "VersionFilePlugin",
-    platforms: [
-        .iOS(.v13),
-        .macOS(.v10_15)
-    ],
     products: [
         .plugin(name: "VersionFile", targets: ["VersionFile"])
     ],
