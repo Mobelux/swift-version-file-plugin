@@ -94,11 +94,16 @@ private extension VersionFile {
         }
 
         return targetsToProcess.compactMap { target in
-            guard let target = target as? SourceModuleTarget, case .generic = target.kind else {
+            guard let target = target as? SourceModuleTarget else {
                 return nil
             }
 
-            return target
+            switch target.kind {
+            case .generic, .executable:
+                return target
+            case .test:
+                return nil
+            }
         }
     }
 
