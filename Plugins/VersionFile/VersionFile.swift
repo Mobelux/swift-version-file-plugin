@@ -47,7 +47,9 @@ struct VersionFile: CommandPlugin {
         arguments: [String]
     ) async throws {
         if arguments.contains("--verbose") {
-            print("Command plugin execution with arguments \(arguments.description) for Swift package \(context.package.displayName). All target information: \(context.package.targets.description)")
+            let targetsDescription = context.package.targets.map(\.debugDescription).joined(separator: "\n  - ")
+            let packageDescription = "`\(context.package.displayName)`.\nTargets:\n  - \(targetsDescription)"
+            print("\nCommand plugin execution with arguments `\(arguments.description)` for Swift package \(packageDescription)")
         }
 
         var argExtractor = ArgumentExtractor(arguments)
