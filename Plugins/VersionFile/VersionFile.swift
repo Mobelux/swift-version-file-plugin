@@ -53,7 +53,7 @@ struct VersionFile: CommandPlugin {
         var argExtractor = ArgumentExtractor(arguments)
         let selectedTargets = argExtractor.extractOption(named: "target")
 
-        let command = try argExtractor.extractCommand()
+        let command = try extractCommand(from: &argExtractor)
         let targets = targetsToProcess(in: context.package, selectedTargets: selectedTargets)
 
         let semver = try context.tool(named: "semver")
@@ -81,6 +81,25 @@ struct VersionFile: CommandPlugin {
 }
 
 private extension VersionFile {
+    /// Extracts a ``Command`` from the given argument extractor and returns it.
+    ///
+    /// - Parameter argExtractor: The argument extractor.
+    /// - Returns: The extracted command.
+    func extractCommand(from argExtractor: inout ArgumentExtractor) throws -> Command {
+        if let releaseString = argExtractor.extractOption(named: "bump").first {
+            guard let release = Release(rawValue: releaseString) else {
+                let validOptions = Release.allCases.map { $0.rawValue }.joined(separator: " | ")
+                throw "Invalid bump value `\(releaseString)` - valid options are: \(validOptions)"
+            }
+
+            return .bump(release)
+        } else if let versionString = argExtractor.extractOption(named: "create").first {
+            return .create(versionString)
+        } else {
+            throw "Unknown arguments"
+        }
+    }
+
     /// Returns the targets to process in the given package.
     ///
     /// - Parameters:
@@ -90,7 +109,7 @@ private extension VersionFile {
     func targetsToProcess(in package: Package, selectedTargets: [String]) -> [SourceModuleTarget] {
         var targetsToProcess: [Target] = package.targets
         if selectedTargets.isEmpty == false {
-            targetsToProcess = package.targets.filter { selectedTargets.contains($0.name) }.map { $0 }
+            targetsToProcess = package.targets.filter { selectedTargets.contains($0.name) }
         }
 
         return targetsToProcess.compactMap { target in
