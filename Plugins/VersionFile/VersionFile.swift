@@ -124,6 +124,9 @@ private extension VersionFile {
                 return target
             case .test:
                 return nil
+            @unknown default:
+                Diagnostics.warning("Unrecognized product type for target \(target.name): \(target.kind)")
+                return nil
             }
         }
     }
