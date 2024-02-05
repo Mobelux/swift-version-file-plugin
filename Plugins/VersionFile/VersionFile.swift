@@ -190,14 +190,14 @@ private extension VersionFile {
         process.waitUntilExit()
 
         // Check whether the subprocess invocation was successful.
-        if process.terminationReason == .exit && process.terminationStatus == 0 {
-            return String(
-                decoding: outputPipe.fileHandleForReading.readDataToEndOfFile(),
-                as: UTF8.self)
-        } else {
+        guard process.terminationReason == .exit && process.terminationStatus == 0 else {
             let problem = "\(process.terminationReason):\(process.terminationStatus)"
             Diagnostics.error("\(tool) invocation failed: \(problem)")
             throw problem
         }
+
+        return String(
+            decoding: outputPipe.fileHandleForReading.readDataToEndOfFile(),
+            as: UTF8.self)
     }
 }
